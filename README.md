@@ -1,4 +1,4 @@
-# Highly Available Redis Docker Compose With Consul And Spring Framework
+# Highly Available Redis Docker Compose With Spring Framework
 
 #### For see Spring boot with High Available Redis Sentinel example go to this link:
 https://github.com/sudoitir/spring-with-redis-sentinel
