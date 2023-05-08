@@ -1,4 +1,4 @@
-# Highly Available Redis Docker Compose
+# High Availability Redis Sentinel With Docker Compose
 
 #### For see Spring boot with High Available Redis Sentinel example go to this link:
 https://github.com/sudoitir/spring-with-redis-sentinel
