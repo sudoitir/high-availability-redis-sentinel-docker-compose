@@ -59,3 +59,5 @@ which contains the Sentinel configuration options, such as the list of Redis ins
 <p>In summary, Redis replication uses a master-slave model to replicate data between Redis instances, while Redis Sentinel<br>
 provides automatic failover and high availability for Redis replication setups. Together, they provide a robust and<br>
 scalable solution for building highly available Redis infrastructures.</p>
+
+More info at: https://redis.io/docs/management/sentinel/
