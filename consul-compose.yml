@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  consul:
+    image: consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"
+    networks:
+      - consul-network
+
+networks:
+  consul-network:

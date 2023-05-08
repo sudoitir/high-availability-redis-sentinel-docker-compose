@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  redis-master:
+    image: redis:6.2.4
+    container_name: redis-master
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-master-data:/data
+    networks:
+      redis-network:
+        aliases:
+          - redis-master
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      - "CONSUL_HTTP_ADDR=consul:8500"
+      - "SERVICE_NAME=redis-master"
+      - "SERVICE_TAGS=redis,db"
+      - "SERVICE_CHECK_HTTP=/health"
+      - "SERVICE_CHECK_INTERVAL=15s"
+      - "SERVICE_CHECK_TIMEOUT=3s"
+
+  redis-slave:
+    image: redis:6.2.4
+    command: redis-server --appendonly yes --slaveof redis-master 6379
+    volumes:
+      - redis-slave-data:/data
+    networks:
+      redis-network:
+        aliases:
+          - redis-slave
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+    environment:
+      - "CONSUL_HTTP_ADDR=consul:8500"
+      - "SERVICE_NAME=redis-slave"
+      - "SERVICE_TAGS=redis,db"
+      - "SERVICE_CHECK_HTTP=/health"
+      - "SERVICE_CHECK_INTERVAL=15s"
+      - "SERVICE_CHECK_TIMEOUT=3s"
+
+  redis-sentinel:
+    image: redis:6.2.4
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel.conf:/usr/local/etc/redis/sentinel.conf
+    networks:
+      redis-network:
+        aliases:
+          - redis-sentinel
+    links:
+      - consul
+      - redis-master
+      - redis-slave
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+    environment:
+      - "CONSUL_HTTP_ADDR=consul:8500"
+      - "SERVICE_NAME=redis-sentinel"
+      - "SERVICE_TAGS=sentinel"
+      - "SERVICE_CHECK_HTTP=/health"
+      - "SERVICE_CHECK_INTERVAL=15s"
+      - "SERVICE_CHECK_TIMEOUT=3s"
+
+networks:
+  redis-network:
+    external:
+      name: consul-network
+
+volumes:
+  redis-master-data:
+  redis-slave-data:
