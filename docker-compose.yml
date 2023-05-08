@@ -22,13 +22,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    environment:
-      - "CONSUL_HTTP_ADDR=consul:8500"
-      - "SERVICE_NAME=redis-master"
-      - "SERVICE_TAGS=redis,db"
-      - "SERVICE_CHECK_HTTP=/health"
-      - "SERVICE_CHECK_INTERVAL=15s"
-      - "SERVICE_CHECK_TIMEOUT=3s"
 
   redis-slave:
     image: redis:6.2.4
@@ -43,13 +36,8 @@ services:
       replicas: 2
       restart_policy:
         condition: any
-    environment:
-      - "CONSUL_HTTP_ADDR=consul:8500"
-      - "SERVICE_NAME=redis-slave"
-      - "SERVICE_TAGS=redis,db"
-      - "SERVICE_CHECK_HTTP=/health"
-      - "SERVICE_CHECK_INTERVAL=15s"
-      - "SERVICE_CHECK_TIMEOUT=3s"
+    ports:
+      - "6380-6381:6379"
 
   redis-sentinel:
     image: redis:6.2.4
@@ -60,26 +48,19 @@ services:
       redis-network:
         aliases:
           - redis-sentinel
-    links:
-      - consul
+    depends_on:
       - redis-master
       - redis-slave
     deploy:
       replicas: 3
       restart_policy:
         condition: any
-    environment:
-      - "CONSUL_HTTP_ADDR=consul:8500"
-      - "SERVICE_NAME=redis-sentinel"
-      - "SERVICE_TAGS=sentinel"
-      - "SERVICE_CHECK_HTTP=/health"
-      - "SERVICE_CHECK_INTERVAL=15s"
-      - "SERVICE_CHECK_TIMEOUT=3s"
+    ports:
+      - "26379-26381:26379"
 
 networks:
   redis-network:
-    external:
-      name: consul-network
+    external: true
 
 volumes:
   redis-master-data:
